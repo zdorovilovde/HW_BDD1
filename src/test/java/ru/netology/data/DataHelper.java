@@ -49,7 +49,7 @@ public class DataHelper {
 
     @Value
     public static class CardInfo {
-        String number;
+        String CardNumber;
         String testId;
     }
 }
