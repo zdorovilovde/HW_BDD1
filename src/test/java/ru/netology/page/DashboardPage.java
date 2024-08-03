@@ -30,10 +30,19 @@ public class DashboardPage {
         var value = text.substring(start + balanceStart.length(),finish);
         return Integer.parseInt(value);
     }
+    public TransferPage selectCardToTransfer(DataHelper.CardInfo cardInfo) {
+        cards.findBy(Condition.attribute("data-test-id", cardInfo.getTestId())).$("button").click();
+        return new TransferPage();
+    }
 
-
-
-
-
-
+    public void reloadDashboardPage(){
+        reloadButton.click();
+        heading.shouldBe(visible);
+    }
 }
+
+
+
+
+
+
