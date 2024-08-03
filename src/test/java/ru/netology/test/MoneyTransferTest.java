@@ -9,8 +9,7 @@ import ru.netology.page.LoginPage;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.netology.data.DataHelper.generateValidAmount;
-import static ru.netology.data.DataHelper.getMaskedNumber;
+import static ru.netology.data.DataHelper.*;
 
 public class MoneyTransferTest {
     DashboardPage dashboardPage;
@@ -44,5 +43,32 @@ public class MoneyTransferTest {
         var actualBalanceSecondCard = dashboardPage.getCardBalance(getMaskedNumber(secondCardInfo.getCardNumber()));
         assertAll(() -> assertEquals(expectedBalanceFirstCard, actualBalanceFirstCard),
                 () -> assertEquals(expectedBalanceSecondCard, actualBalanceSecondCard));
+    }
+
+    @Test
+    void shouldTransferFromSecondToFirst() {
+        var amount = generateValidAmount(secondCardBalance);
+        var expectedBalanceSecondCard = secondCardBalance - amount;
+        var expectedBalanceFirstCard = firstCardBalance + amount;
+        var transferPage = dashboardPage.selectCardToTransfer(firstCardInfo);
+        dashboardPage = transferPage.makeValidTransfer(String.valueOf(amount), secondCardInfo);
+        dashboardPage.reloadDashboardPage();
+        var actualBalanceSecondCard = dashboardPage.getCardBalance(getMaskedNumber(secondCardInfo.getCardNumber()));
+        var actualBalanceFirstCard = dashboardPage.getCardBalance(getMaskedNumber(firstCardInfo.getCardNumber()));
+        assertAll(() -> assertEquals(expectedBalanceSecondCard, actualBalanceSecondCard),
+                () -> assertEquals(expectedBalanceFirstCard, actualBalanceFirstCard));
+    }
+
+    @Test
+    void shouldGetErrorMessageIfAmountMoreBalance() {
+        var amount = generateInvalidAmount(secondCardBalance);
+        var transferPage = dashboardPage.selectCardToTransfer(firstCardInfo);
+        transferPage.makeTransfer(String.valueOf(amount), secondCardInfo);
+        transferPage.findErrorMessage("Сумма перевода, превышает остаток на карте списания");
+        dashboardPage.reloadDashboardPage();
+        var actualBalanceFirstCard = dashboardPage.getCardBalance(getMaskedNumber(firstCardInfo.getCardNumber()));
+        var actualBalanceSecondCard = dashboardPage.getCardBalance(getMaskedNumber(firstCardInfo.getCardNumber()));
+        assertAll(() -> assertEquals(firstCardBalance, actualBalanceFirstCard),
+                () -> assertEquals(secondCardBalance, actualBalanceSecondCard ));
     }
 }
