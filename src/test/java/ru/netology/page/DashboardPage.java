@@ -13,12 +13,13 @@ public class DashboardPage {
     private final String balanceStart = "баланс: ";
     private final String balanceFinish = " р.";
     private final SelenideElement heading = $("[data-test-id=dashboard]");
-    private ElementsCollection cards = $$(".list__item div");
+    private final ElementsCollection cards = $$(".list__item div");
     private final SelenideElement reloadButton = $("[data-test-id='action-reload']");
 
     public DashboardPage() {
         heading.shouldBe(visible);
     }
+
     public int getCardBalance(String maskedCardNumber) {
         var text = cards.findBy(Condition.text(maskedCardNumber)).getText();
         return extractBalance(text);
@@ -27,15 +28,16 @@ public class DashboardPage {
     private int extractBalance(String text) {
         var start = text.indexOf(balanceStart);
         var finish = text.indexOf(balanceFinish);
-        var value = text.substring(start + balanceStart.length(),finish);
+        var value = text.substring(start + balanceStart.length(), finish);
         return Integer.parseInt(value);
     }
+
     public TransferPage selectCardToTransfer(DataHelper.CardInfo cardInfo) {
         cards.findBy(Condition.attribute("data-test-id", cardInfo.getTestId())).$("button").click();
         return new TransferPage();
     }
 
-    public void reloadDashboardPage(){
+    public void reloadDashboardPage() {
         reloadButton.click();
         heading.shouldBe(visible);
     }
